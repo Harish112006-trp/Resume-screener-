@@ -1,6 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+let aiInstance: GoogleGenAI | null = null;
+
+function getAI() {
+  if (!aiInstance) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY is not defined. Please configure it in your environment variables.");
+    }
+    aiInstance = new GoogleGenAI({ apiKey });
+  }
+  return aiInstance;
+}
 
 export interface AnalysisResult {
   score: number;
@@ -13,6 +24,7 @@ export interface AnalysisResult {
 }
 
 export async function analyzeResume(jobDescription: string, resumeText: string): Promise<AnalysisResult> {
+  const ai = getAI();
   const prompt = `
     Analyze the following resume against the provided job description.
     Provide a detailed match analysis including a score from 0 to 100.
