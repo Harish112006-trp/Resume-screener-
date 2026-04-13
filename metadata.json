@@ -1,0 +1,5 @@
+{
+  "name": "G8 AI Resume Screener",
+  "description": "An AI-powered tool to analyze resumes against job descriptions, providing match scores, keyword analysis, and detailed feedback.",
+  "requestFramePermissions": []
+}
