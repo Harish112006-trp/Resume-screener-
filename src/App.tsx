@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   FileText, 
@@ -26,7 +26,52 @@ import { Separator } from '@/components/ui/separator';
 import { analyzeResume, AnalysisResult } from '@/lib/gemini';
 import { cn } from '@/lib/utils';
 
+// Error Boundary Component
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean; error: Error | null }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("ErrorBoundary caught an error", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-rose-50 p-4">
+          <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-xl border border-rose-100">
+            <h2 className="text-2xl font-bold text-rose-600 mb-4">Something went wrong</h2>
+            <p className="text-slate-600 mb-6">The application encountered an unexpected error. Please try refreshing the page.</p>
+            <pre className="bg-slate-50 p-4 rounded-lg text-xs text-rose-500 overflow-auto max-h-40 mb-6">
+              {this.state.error?.message}
+            </pre>
+            <Button onClick={() => window.location.reload()} className="w-full">
+              Reload Application
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
 export default function App() {
+  return (
+    <ErrorBoundary>
+      <MainApp />
+    </ErrorBoundary>
+  );
+}
+
+function MainApp() {
   const [jobDescription, setJobDescription] = useState('');
   const [resumeText, setResumeText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
